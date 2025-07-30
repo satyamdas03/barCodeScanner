@@ -242,23 +242,17 @@ reader = BarcodeReader()
 # ───── EasyOCR Init ─────
 ocr_reader = easyocr.Reader(['en'], gpu=False)
 
-# ───── Helper Functions ─────
 def draw_bbox(frame, pts):
     norm = [(p.x, p.y) if hasattr(p, 'x') else (int(p[0]), int(p[1])) for p in pts]
     for i in range(len(norm)):
         cv2.line(frame, norm[i], norm[(i+1)%len(norm)], (0,255,0), 2)
 
 def lookup_barcode(code: str) -> dict:
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-        "Accept": "application/json"
-    }
-    if len(code)==11 and code.isdigit():
-        code = "0"+code
-    elif len(code)==13 and code.startswith("0"):
-        code = code[1:]
-
-    # BarcodeMonster
+    headers = {"User-Agent":"Mozilla/5.0","Accept":"application/json"}
+    # Normalize UPC/EAN
+    if len(code)==11 and code.isdigit(): code="0"+code
+    elif len(code)==13 and code.startswith("0"): code=code[1:]
+    # 1) BarcodeMonster
     try:
         r = requests.get(f"https://barcode.monster/api/{code}?json=1",
                          headers=headers, timeout=3)
@@ -270,72 +264,61 @@ def lookup_barcode(code: str) -> dict:
                 "description": d.get("description") or d.get("product"),
                 "category": d.get("category")
             }
-    except:
-        pass
-
-    # UPCitemdb
+    except: pass
+    # 2) UPCitemdb
     try:
         r = requests.get("https://api.upcitemdb.com/prod/trial/lookup",
-                         params={"upc": code}, headers=headers, timeout=3)
+                         params={"upc":code}, headers=headers, timeout=3)
         items = r.json().get("items", [])
         if items:
-            item = items[0]
+            it = items[0]
             return {
-                "title": item.get("title") or item.get("model"),
-                "brand": item.get("brand"),
-                "description": item.get("description") or item.get("title"),
-                "category": item.get("category")
+                "title": it.get("title") or it.get("model"),
+                "brand": it.get("brand"),
+                "description": it.get("description") or it.get("title"),
+                "category": it.get("category")
             }
-    except:
-        pass
-
-    # OpenFoodFacts
+    except: pass
+    # 3) OpenFoodFacts
     try:
         r = requests.get(f"https://world.openfoodfacts.org/api/v0/product/{code}.json",
                          headers=headers, timeout=3)
         data = r.json()
         if data.get("status")==1:
-            prod = data["product"]
+            p = data["product"]
             return {
-                "title": prod.get("product_name"),
-                "brand": prod.get("brands"),
-                "description": prod.get("generic_name") or prod.get("product_name"),
-                "category": prod.get("categories") or ", ".join(prod.get("categories_tags", []))
+                "title": p.get("product_name"),
+                "brand": p.get("brands"),
+                "description": p.get("generic_name") or p.get("product_name"),
+                "category": p.get("categories") or ", ".join(p.get("categories_tags", []))
             }
-    except:
-        pass
-
-    # SerpAPI Google Shopping
+    except: pass
+    # 4) Google Shopping via SerpAPI
     try:
         r = requests.get("https://serpapi.com/search",
-                         params={
-                             "engine":  "google_shopping",
-                             "q":       code,
-                             "api_key": "cb63db8d175d05d36b0350e43cc05cdcd2d97578bac620dbb523582bab236f00"
-                         }, headers=headers, timeout=3)
-        res_list = r.json().get("shopping_results", [])
-        if res_list:
-            res = res_list[0]
+                         params={"engine":"google_shopping","q":code,
+                                 "api_key":"cb63db8d175d05d36b0350e43cc05cdcd2d97578bac620dbb523582bab236f00"},
+                         headers=headers, timeout=3)
+        rl = r.json().get("shopping_results", [])
+        if rl:
+            res = rl[0]
             return {
-                "title":       res.get("title"),
-                "brand":       res.get("source"),
+                "title": res.get("title"),
+                "brand": res.get("source"),
                 "description": res.get("description"),
-                "category":    res.get("category")
+                "category": res.get("category")
             }
-    except:
-        pass
-
-    return {"title": None, "brand": None, "description": None, "category": None}
+    except: pass
+    return {"title":None,"brand":None,"description":None,"category":None}
 
 def extract_number_easyocr(roi):
     gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-    blur = cv2.bilateralFilter(gray, 9,75,75)
-    _, thresh = cv2.threshold(blur, 150,255, cv2.THRESH_BINARY_INV)
-    texts = ocr_reader.readtext(thresh, detail=0)
+    blur = cv2.bilateralFilter(gray,9,75,75)
+    _,th = cv2.threshold(blur,150,255,cv2.THRESH_BINARY_INV)
+    texts = ocr_reader.readtext(th, detail=0)
     for t in texts:
         m = re.search(r"\d+\.?\d*", t)
-        if m:
-            return m.group(0)
+        if m: return m.group(0)
     return None
 
 def show_frame(frame):
@@ -343,88 +326,77 @@ def show_frame(frame):
         cv2.imshow("Scanner + EasyOCR", frame)
     except cv2.error:
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        plt.ion()
-        plt.imshow(rgb); plt.axis('off'); plt.pause(0.001)
+        plt.ion(); plt.imshow(rgb); plt.axis('off'); plt.pause(0.001)
 
 def main():
-    log_path = "barcodes.json"
-    records = json.load(open(log_path,"r")) if os.path.exists(log_path) else []
+    log_path="barcodes.json"
+    records = json.load(open(log_path)) if os.path.exists(log_path) else []
     seen = {r["code"] for r in records}
 
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    if not cap.isOpened():
-        cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
-    if not cap.isOpened():
-        print("Cannot open camera")
-        return
+    cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+    if not cap.isOpened(): cap = cv2.VideoCapture(1,cv2.CAP_DSHOW)
+    if not cap.isOpened(): 
+        print("Cannot open camera"); return
 
     try:
         while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
+            ret,frame = cap.read()
+            if not ret: break
 
-            # --- Correct decode_buffer call ---
-            h, w, c = frame.shape
+            # ── Decode using the NumPy overload ──
             try:
                 codes = reader.decode_buffer(
-                    frame.tobytes(),
-                    w,
-                    h,
+                    frame,
                     EnumImagePixelFormat.IPF_BGR_888
                 ) or []
             except BarcodeReaderError:
                 codes = []
 
+            # Debug
             print("Found barcodes:", [r.barcode_text for r in codes])
 
             # OCR ROIs
-            H, W = frame.shape[:2]
+            H,W = frame.shape[:2]
             mrp_roi = frame[int(0.2*H):int(0.4*H), int(0.6*W):int(0.95*W)]
             qty_roi = frame[int(0.4*H):int(0.6*H), int(0.6*W):int(0.95*W)]
-
             mrp_val = extract_number_easyocr(mrp_roi)
             qty_val = extract_number_easyocr(qty_roi)
 
             for res in codes:
                 code = res.barcode_text
-                if not code or code in seen:
-                    continue
+                if not code or code in seen: continue
 
                 pts = res.localization_result.localization_points
                 draw_bbox(frame, pts)
-                x, y = (pts[0].x, pts[0].y) if hasattr(pts[0],'x') else (int(pts[0][0]),int(pts[0][1]))
-                cv2.putText(frame, code, (x, y-10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,255,0), 2)
+                x,y = (pts[0].x,pts[0].y) if hasattr(pts[0],'x') else (int(pts[0][0]),int(pts[0][1]))
+                cv2.putText(frame, code, (x,y-10),
+                            cv2.FONT_HERSHEY_SIMPLEX,0.6,(0,255,0),2)
 
                 info = lookup_barcode(code)
                 rec = {
                     "timestamp": datetime.datetime.now().isoformat(),
-                    "code":      code,
-                    "mrp":       mrp_val,
-                    "quantity":  qty_val,
+                    "code": code,
+                    "mrp": mrp_val,
+                    "quantity": qty_val,
                     **info
                 }
                 records.append(rec)
                 seen.add(code)
-                with open(log_path, "w", encoding="utf-8") as f:
-                    json.dump(records, f, indent=2, ensure_ascii=False)
+                with open(log_path,"w",encoding="utf-8") as f:
+                    json.dump(records,f,indent=2,ensure_ascii=False)
 
             show_frame(frame)
-
             try:
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
+                if cv2.waitKey(1)&0xFF==ord('q'): break
             except cv2.error:
                 pass
 
     finally:
         cap.release()
-        try:
-            cv2.destroyAllWindows()
-        except cv2.error:
-            plt.close('all')
+        try: cv2.destroyAllWindows()
+        except cv2.error: plt.close('all')
 
-if __name__ == "__main__":
+if __name__=="__main__":
     main()
+
 
