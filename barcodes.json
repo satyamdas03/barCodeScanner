@@ -1,24 +1,6 @@
 [
   {
-    "timestamp": "2025-07-29T14:40:50.994728",
-    "type": "CODE_128",
-    "code": "8605319529896",
-    "title": "Maytag Smart Pet Pro Front Load Washer",
-    "brand": "Home Depot",
-    "description": null,
-    "category": null
-  },
-  {
-    "timestamp": "2025-07-29T14:44:55.844946",
-    "type": "CODE_128",
-    "code": "ABC-abc-1234",
-    "title": null,
-    "brand": null,
-    "description": null,
-    "category": null
-  },
-  {
-    "timestamp": "2025-07-29T14:48:16.063834",
+    "timestamp": "2025-07-30T11:38:44.624068",
     "type": "EAN_13",
     "code": "8901571007356",
     "title": "Crocin",
