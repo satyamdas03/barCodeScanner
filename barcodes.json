@@ -1,11 +1,29 @@
 [
   {
-    "timestamp": "2025-07-30T11:38:44.624068",
+    "timestamp": "2025-07-30T15:11:27.546775",
     "type": "EAN_13",
     "code": "8901571007356",
     "title": "Crocin",
     "brand": null,
     "description": "Crocin",
     "category": ""
+  },
+  {
+    "timestamp": "2025-07-30T15:14:40.729185",
+    "type": "EAN_13",
+    "code": "8906006030251",
+    "title": null,
+    "brand": null,
+    "description": null,
+    "category": null
+  },
+  {
+    "timestamp": "2025-07-30T15:14:47.385296",
+    "type": "QR_CODE",
+    "code": "Aceclofenac & Paracetamol Tablets\nACEPARON TABLETS\nMfg. Lic. No. 335\nPack: 3 x 10 Tablets\nGTIN No.: 8906006030251",
+    "title": null,
+    "brand": null,
+    "description": null,
+    "category": null
   }
 ]
