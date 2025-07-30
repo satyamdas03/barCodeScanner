@@ -1,26 +1,35 @@
 [
   {
-    "timestamp": "2025-07-30T15:11:27.546775",
+    "timestamp": "2025-07-30T15:57:46.745569",
     "type": "EAN_13",
-    "code": "8901571007356",
-    "title": "Crocin",
-    "brand": null,
-    "description": "Crocin",
-    "category": ""
-  },
-  {
-    "timestamp": "2025-07-30T15:14:40.729185",
-    "type": "EAN_13",
-    "code": "8906006030251",
-    "title": null,
-    "brand": null,
+    "code": "8904102745550",
+    "title": "Aimil Amlycure DS Syrup",
+    "brand": "Distacart",
     "description": null,
     "category": null
   },
   {
-    "timestamp": "2025-07-30T15:14:47.385296",
-    "type": "QR_CODE",
-    "code": "Aceclofenac & Paracetamol Tablets\nACEPARON TABLETS\nMfg. Lic. No. 335\nPack: 3 x 10 Tablets\nGTIN No.: 8906006030251",
+    "timestamp": "2025-07-30T15:57:59.593714",
+    "type": "EAN_13",
+    "code": "8904109845550",
+    "title": "SKALA Expert Passion Fruit and Pataua Oil Shampoo & Conditioner Kit",
+    "brand": "Pure Brasil",
+    "description": null,
+    "category": null
+  },
+  {
+    "timestamp": "2025-07-30T15:58:05.463059",
+    "type": "EAN_13",
+    "code": "8904102845540",
+    "title": "Evenflo Chase Plus 2-in-1 Booster Car Seat",
+    "brand": "Walmart",
+    "description": null,
+    "category": null
+  },
+  {
+    "timestamp": "2025-07-30T15:58:19.966219",
+    "type": "EAN_13",
+    "code": "8204102742550",
     "title": null,
     "brand": null,
     "description": null,
