@@ -18,5 +18,23 @@
     "brand": null,
     "description": null,
     "category": null
+  },
+  {
+    "timestamp": "2025-08-03T18:35:20.690101",
+    "type": "EAN_13",
+    "code": "8906006030251",
+    "title": null,
+    "brand": null,
+    "description": null,
+    "category": null
+  },
+  {
+    "timestamp": "2025-08-03T18:35:27.242434",
+    "type": "QR_CODE",
+    "code": "Aceclofenac & Paracetamol Tablets\nACEPARON TABLETS\nMfg. Lic. No. 335\nPack: 3 x 10 Tablets\nGTIN No.: 8906006030251",
+    "title": null,
+    "brand": null,
+    "description": null,
+    "category": null
   }
 ]
